@@ -4,9 +4,10 @@
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const validId = value => typeof value === 'string' && /^[a-z0-9][a-z0-9-]{0,79}$/.test(value);
   const text = value => typeof value === 'string' && value.trim().length > 0;
+  const assetURL = window.practiceAsset || (path => path);
   if (!document.querySelector('link[data-memory-style]')) {
     const link = document.createElement('link');
-    link.rel = 'stylesheet'; link.href = 'memorize.css'; link.dataset.memoryStyle = '';
+    link.rel = 'stylesheet'; link.href = assetURL('memorize.css'); link.dataset.memoryStyle = '';
     document.head.appendChild(link);
   }
 
@@ -49,7 +50,7 @@
         if (professor.memorizationPath !== `professors/${professor.code}/memory.js`) { reject(new Error('path')); return; }
         delete window.MEMORY_DATA;
         const script = document.createElement('script');
-        script.src = professor.memorizationPath;
+        script.src = assetURL(professor.memorizationPath);
         script.onerror = () => { script.remove(); reject(new Error('network')); };
         script.onload = () => {
           try { const result = validate(window.MEMORY_DATA); delete window.MEMORY_DATA; resolve(result); }

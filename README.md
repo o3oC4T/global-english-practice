@@ -88,6 +88,10 @@ ZIP을 전체 해제한 뒤 `index.html`을 Chrome 또는 Edge로 열고 `yjy`�
 
 현재 저장소는 `main` 브랜치 최상위에서 배포합니다. 앱 폴더에서 변경을 커밋하고 푸시하면 됩니다.
 
+배포 파일이 브라우저에 남아 메뉴가 누락되는 것을 막기 위해 `index.html`과 `study.html`의 `app-release` 및 CSS·스크립트 URL의 `v`를 같은 릴리스 값으로 관리합니다. 새 배포 때 두 HTML의 값을 함께 바꿉니다. 코드 입력 뒤 이동하는 학습 주소, 동적으로 읽는 앱·본문 파일에도 같은 값이 붙습니다. 학습 중인 화면을 강제로 새로고침하지 않습니다. 이는 캐시를 구분하는 용도이며, 시험 시작 당시의 문제를 고정하는 기능은 아닙니다.
+
+이전 탭에 새 메뉴가 보이지 않으면 새 릴리스 주소로 접속합니다. 현재 바로가기: [본문 암기](https://o3oc4t.github.io/global-english-practice/study.html?professor=yjy&v=20261019-memory-2#memorize). 같은 사이트이므로 교수님별 브라우저 저장 기록은 유지됩니다.
+
 ```bash
 git add .
 git commit -m "Update professor practice materials"

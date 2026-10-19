@@ -3,6 +3,13 @@
   const code = (new URLSearchParams(location.search).get('professor') || '').trim().toLowerCase();
   const courses = window.PROFESSOR_COURSES;
   const main = document.getElementById('main');
+  const release = document.querySelector('meta[name="app-release"]')?.content;
+  // The HTML selects the release, including for lazy scripts and local file URLs.
+  window.practiceAsset = path => {
+    const url = new URL(path, location.href);
+    if (release) url.searchParams.set('v', release);
+    return url.href;
+  };
   function fail() {
     delete window.EXAM_DATA;
     delete window.ACTIVE_PROFESSOR;
@@ -16,7 +23,7 @@
   if (course.code !== code || course.assetRoot !== `professors/${code}/` || course.dataPath !== `${course.assetRoot}data.js`) { fail(); return; }
   delete window.EXAM_DATA;
   const dataScript = document.createElement('script');
-  dataScript.src = course.dataPath;
+  dataScript.src = window.practiceAsset(course.dataPath);
   dataScript.onerror = fail;
   dataScript.onload = () => {
     const data = window.EXAM_DATA;
@@ -33,7 +40,7 @@
     document.getElementById('semester-label').textContent = course.semester;
     document.getElementById('set-count').textContent = data.reading.sets.length;
     const appScript = document.createElement('script');
-    appScript.src = 'app.js';
+    appScript.src = window.practiceAsset('app.js');
     appScript.onerror = fail;
     document.body.appendChild(appScript);
   };

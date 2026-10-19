@@ -5,6 +5,7 @@
   const professor = window.ACTIVE_PROFESSOR;
   if (!D || !professor || D.professorCode !== professor.code || D.course?.code !== professor.code) { main.textContent = '교수님 코드와 학습 자료가 일치하지 않습니다. 코드 입력 화면으로 돌아가 주세요.'; return; }
   const C = D.course;
+  const assetURL = window.practiceAsset || (path => path);
   const KEY = `global-english-practice:${professor.code}:v1`;
   const LEGACY_KEY = 'global-english-practice-v1';
   const SPEECH_SECONDS = C.speaking.practiceSeconds;
@@ -24,7 +25,12 @@
   let speechHide=false, speechKorean=true, resultOnlyWrong=false;
   let memoryUI=null, memoryModule=null, memoryRoute=0;
   const hasMemory=professor.memorizationPath===`${professor.assetRoot}memory.js`;
-  const memoryNav=document.querySelector('#nav [data-view="memorize"]');
+  let memoryNav=document.querySelector('#nav [data-view="memorize"]');
+  if(hasMemory && !memoryNav){
+    memoryNav=document.createElement('a');memoryNav.href='#memorize';memoryNav.dataset.view='memorize';
+    memoryNav.innerHTML='<span aria-hidden="true">Aa</span> 본문 암기';
+    document.querySelector('#nav [data-view="home"]').after(memoryNav);
+  }
   if(memoryNav) memoryNav.hidden=!hasMemory;
   const emptyMemory=()=>({mode:'sentence',visibility:'both',passages:{}});
   function sanitizeMemory(raw){
@@ -116,7 +122,7 @@
     try{
       if(!memoryModule)memoryModule=new Promise((resolve,reject)=>{
         if(window.createMemoryPractice){resolve();return;}
-        const script=document.createElement('script');script.src='memorize.js';
+        const script=document.createElement('script');script.src=assetURL('memorize.js');
         script.onload=()=>typeof window.createMemoryPractice==='function'?resolve():reject(new Error('module'));
         script.onerror=()=>{script.remove();reject(new Error('network'));};document.body.appendChild(script);
       });

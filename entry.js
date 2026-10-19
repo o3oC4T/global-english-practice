@@ -36,6 +36,11 @@
       return;
     }
 
-    window.location.assign(`study.html?professor=${encodeURIComponent(code)}#home`);
+    const target = new URL('study.html', location.href);
+    target.searchParams.set('professor', code);
+    const release = document.querySelector('meta[name="app-release"]')?.content;
+    if (release) target.searchParams.set('v', release);
+    target.hash = 'home';
+    window.location.assign(target.href);
   });
 })();
