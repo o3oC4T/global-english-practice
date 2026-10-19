@@ -1,0 +1,18 @@
+Global English II 모의고사
+
+웹에서 바로 풀기: https://o3oc4t.github.io/global-english-practice/
+GitHub: https://github.com/o3oC4T/global-english-practice
+
+1. index.html을 더블클릭합니다.
+2. 회차를 고르고 전체 / 리딩 / 듣기 중 원하는 방식으로 풉니다.
+3. 제출하면 점수, 해설, 영어 스크립트를 볼 수 있습니다.
+
+10회 × 리딩 30문항 + 듣기 30문항 = 총 600문항 자리
+듣기 Part 2 복습 30문항을 제외하면 서로 다른 570문항입니다.
+스피킹 예시 답변은 실제 시험 질문 중 6개입니다.
+
+audio, assets 폴더와 JS/CSS 파일을 함께 유지하세요.
+답안은 브라우저에 저장됩니다. 옮기기 전에 학습 기록을 내보내세요.
+
+GitHub Pages 업로드 방법: README.md 또는 화면의 ‘학습 안내’ 참고.
+파일 전체를 그대로 업로드할 수 있도록 준비되어 있습니다.
