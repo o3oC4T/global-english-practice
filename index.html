@@ -4,40 +4,46 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#274b40">
-  <meta name="description" content="Global English II 중간시험 대비. 리딩·리스닝 10회분과 스피킹 연습.">
-  <title>Global English · 모의고사</title>
+  <meta name="description" content="교수님 코드로 시작하는 Global English 모의고사와 스피킹 연습.">
+  <title>Global English · 교수님 코드</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="entry.css">
 </head>
 <body>
-  <a class="skip" href="#main">본문으로 이동</a>
-  <div class="app-shell">
-    <aside class="sidebar" aria-label="주 메뉴">
-      <a class="brand" href="#home" aria-label="Global English 첫 화면">
+  <div class="entry-shell">
+    <header class="entry-header">
+      <a class="brand" href="index.html" aria-label="Global English 첫 화면">
         <span class="brand-icon" aria-hidden="true">g<span>e</span><i>.</i></span>
         <span>GLOBAL ENGLISH<small>YOUR PRACTICE STUDIO</small></span>
       </a>
-      <div class="semester"><span class="status-dot"></span> 2026 FALL · MIDTERM</div>
-      <nav id="nav">
-        <a href="#home" data-view="home"><span aria-hidden="true">▦</span> 모의고사 <b>10</b></a>
-        <a href="#wrong" data-view="wrong"><span aria-hidden="true">↺</span> 오답 노트 <b id="wrong-count">0</b></a>
-        <a href="#speaking" data-view="speaking"><span aria-hidden="true">◉</span> 스피킹 연습</a>
-        <a href="#guide" data-view="guide"><span aria-hidden="true">☷</span> 학습 안내</a>
-      </nav>
-      <div class="sidebar-note"><div class="mini-book" aria-hidden="true">Aa</div><strong>A little practice,<br>a little more confidence.</strong><p>한 회씩 풀고, 틀린 이유를 알아가요.</p></div>
-      <div class="sidebar-bottom"><span class="status-dot"></span> 오프라인에서도 학습 가능<small>답안은 이 브라우저에 저장돼요.</small><button class="text-button" id="backup">학습 기록 내보내기 ↗</button></div>
-    </aside>
-    <div class="main-wrap">
-      <header class="topbar"><span id="breadcrumb">My learning / 모의고사</span><span class="topbar-right">UNIT 06 — 07 <span class="avatar">GE</span></span></header>
-      <main id="main" tabindex="-1"><div class="loading">학습 자료를 불러오는 중입니다…</div></main>
-      <footer class="footer"><span>GLOBAL ENGLISH II</span><span>차근차근, 나만의 속도로.</span></footer>
-    </div>
+      <span class="header-note">차근차근, 나만의 속도로.</span>
+    </header>
+
+    <main class="entry-main">
+      <section class="entry-card" aria-labelledby="entry-title">
+        <div class="entry-symbol" aria-hidden="true">Aa</div>
+        <p class="eyebrow">YOUR CLASS, YOUR PRACTICE</p>
+        <h1 id="entry-title">Enter code?</h1>
+        <p class="entry-intro">교수님 코드를 입력해 주세요.</p>
+
+        <form class="code-form" id="code-form" novalidate>
+          <label class="code-label" for="professor-code">교수님 코드</label>
+          <input class="code-input" id="professor-code" name="professor" type="text" placeholder="코드 입력" autocomplete="off" autocapitalize="none" spellcheck="false" aria-invalid="false" aria-describedby="code-error entry-help">
+          <p class="code-error" id="code-error" role="alert" aria-atomic="true"></p>
+          <button class="enter-button" type="submit">학습 시작하기 <span aria-hidden="true">→</span></button>
+        </form>
+
+        <p class="entry-help" id="entry-help">코드에 해당하는 교수님의 모의고사로 이동해요.</p>
+        <noscript><p class="no-script">모의고사를 사용하려면 브라우저의 JavaScript를 켜 주세요.</p></noscript>
+      </section>
+    </main>
+
+    <footer class="entry-footer">
+      <span>GLOBAL ENGLISH · PRACTICE STUDIO</span>
+      <span>A little more confidence.</span>
+    </footer>
   </div>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <dialog id="modal"><div id="modal-body"></div></dialog>
-  <input type="file" id="restore-file" accept="application/json,.json" hidden>
-  <noscript><p>이 모의고사를 사용하려면 브라우저의 JavaScript를 켜 주세요.</p></noscript>
-  <script src="data.js"></script>
-  <script src="app.js"></script>
+  <script src="courses.js"></script>
+  <script src="entry.js"></script>
 </body>
 </html>

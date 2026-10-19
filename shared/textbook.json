@@ -1,0 +1,13 @@
+{
+  "id": "pathways-reading-writing-level-4",
+  "kind": "source-reference",
+  "allowedSharedMaterials": [
+    {
+      "filename": "Pathways_4__Reading_and_Writing_Skills___PDF___Robot___Robotics.pdf",
+      "bytes": 164304357,
+      "sha256": "38ab66883b70234cdf24f8a5c4e1a0503baf923199ad0a7959f8c215234f98c6"
+    }
+  ],
+  "policy": "Only this exact source PDF may be shared between professors. Answer keys, textbook audio, HWP/PPT handouts, scripts, exam instructions, generated passages/questions/explanations, and speaking answers belong to their assigned professor.",
+  "delivery": "Source reference only. The original PDF remains in the user's local materials; this manifest does not publish or duplicate it."
+}

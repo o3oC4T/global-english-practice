@@ -1,0 +1,163 @@
+{
+  "professorCode": "yjy",
+  "scope": "All initially provided course material except the one shared textbook PDF.",
+  "originalSources": [
+    {
+      "filename": "Academic Essay Writing Class Material (1).pdf",
+      "bytes": 468910,
+      "sha256": "7d4595efad37fab383e2c5a15a73ad8af34155d79eba9f4039be287bb5314f4d"
+    },
+    {
+      "filename": "Chapter 6-1.pptx",
+      "bytes": 62732,
+      "sha256": "61b701c92279cbca4b45f5140fdac555174fd172b082f155cb38d2807c717d81"
+    },
+    {
+      "filename": "Effective Tips to Improve Your English Skills.pptx",
+      "bytes": 12837110,
+      "sha256": "a0a33fbe4146a08d4e8eb855fb855014d03bc26159a29c3efc4bc110d13c3d3a"
+    },
+    {
+      "filename": "Longman Series4-C6-R1 (1).mp3",
+      "bytes": 6459875,
+      "sha256": "363a3558c6d5d367ac7723e3ff7246066cdd652a5d4867759c52d0634a68eeb0"
+    },
+    {
+      "filename": "Longman Series4-C6-R1.mp3",
+      "bytes": 6459875,
+      "sha256": "363a3558c6d5d367ac7723e3ff7246066cdd652a5d4867759c52d0634a68eeb0"
+    },
+    {
+      "filename": "PW3e_RW_L4_SB_Audio_06.mp3",
+      "bytes": 8953535,
+      "sha256": "d5437ec06fa1d74b41d386c6d5c90754e04f15d0d9e79a2975eb688aad35bd6f"
+    },
+    {
+      "filename": "PW3e_RW_L4_SB_Audio_07.mp3",
+      "bytes": 13342877,
+      "sha256": "951e14c1b51dd4fbb2cb630ae9b37715a50037cbf909e484c6b6ddf1b6e95286"
+    },
+    {
+      "filename": "The Ant and the  Grasshopper.pdf",
+      "bytes": 59753,
+      "sha256": "485d3297359936b559383afeb2461b107ab9e74e9e53adc29f0300eafb9f65d1"
+    },
+    {
+      "filename": "The ant and the grasshopper - W.Somerset Maugham short story. youtube link.txt",
+      "bytes": 28,
+      "sha256": "7cc5cf7cc13e494b9d70f79b5bee1b7edb0665a24e8f8389d9e39fe6a084c6f3"
+    },
+    {
+      "filename": "UNIT 6-1 (1).hwp",
+      "bytes": 121344,
+      "sha256": "98a8c4b0627c546c4108195991736c6a586517682ecacb292fabf477ba9b1814"
+    },
+    {
+      "filename": "UNIT 6-1.hwp",
+      "bytes": 121344,
+      "sha256": "98a8c4b0627c546c4108195991736c6a586517682ecacb292fabf477ba9b1814"
+    },
+    {
+      "filename": "UNIT 6-1.mp3",
+      "bytes": 536956,
+      "sha256": "5b0e386dc7cc91640ea53920f43165a1fb7397754687612369f6ac3454f61a06"
+    },
+    {
+      "filename": "UNIT 6-2.hwp",
+      "bytes": 33280,
+      "sha256": "f6ad3f577018080eef5eb650610e591a8c05a24037d5fc229e371780fc4b2461"
+    },
+    {
+      "filename": "UNIT 6-2.mp3",
+      "bytes": 529660,
+      "sha256": "1c35fa97267ed0c0f7fed04091de9c285dd5c29d0b89bb36ad49a42ba9b83a0c"
+    },
+    {
+      "filename": "UNIT 6-3.hwp",
+      "bytes": 94720,
+      "sha256": "62da78d44e472712fef9e6083512056b6905855ad4ae7e80cf345f7451699ce3"
+    },
+    {
+      "filename": "UNIT 6-3.mp3",
+      "bytes": 823036,
+      "sha256": "66cee74bb538cac1d940dc40a0be84390fb9d07146b7a4f732ad41bc0dbe8903"
+    },
+    {
+      "filename": "UNIT 6.pptx",
+      "bytes": 73967,
+      "sha256": "b183574fdd1474ec60cd848ad4687274006ec87b23ce7a632657b38ddc589860"
+    },
+    {
+      "filename": "UNIT 6_정답.hwp",
+      "bytes": 52224,
+      "sha256": "b7db2d3be7549ff328e9126d8eb196dafafd39da468a412634f08b45a35af8d8"
+    },
+    {
+      "filename": "UNIT 7.hwp",
+      "bytes": 69632,
+      "sha256": "69d3a5e0807d4fdefe815385062898657924af6e9bd5731b3062d174c2f497e9"
+    },
+    {
+      "filename": "UNIT 7.mp3",
+      "bytes": 692476,
+      "sha256": "c08fd30b9d6f856e62b5bcd2c9d34003e7d7a32a99de3274e58fef10c27b23d8"
+    },
+    {
+      "filename": "UNIT 7.pptx",
+      "bytes": 73850,
+      "sha256": "8170b8f0d768f7ed1ebd445bd3002810c8d6de36ad0c608e0fb242d054cf47f8"
+    },
+    {
+      "filename": "UNIT 7_SR.hwp",
+      "bytes": 33280,
+      "sha256": "a57ec01e174a1e962cc8a7588c49dc4e8979ecb157fbd6932ac41fd81f62228e"
+    },
+    {
+      "filename": "UNIT 7_어휘.hwp",
+      "bytes": 50688,
+      "sha256": "0a93eee3f76b6944300caa27b506c8dd8ce88d32bd846164d4975868132a2c57"
+    },
+    {
+      "filename": "UNIT 7_어휘_정답.hwp",
+      "bytes": 53760,
+      "sha256": "d912810764c1ad9e3cbc8628fffce611d29b1c5d91868204042fceb1ade65c61"
+    },
+    {
+      "filename": "문제(6) (1).hwp",
+      "bytes": 51200,
+      "sha256": "20b14d9f57d34e132bc88f00536a540c3af6de3a5a7bf122eabee022c964aec7"
+    },
+    {
+      "filename": "문제(6).hwp",
+      "bytes": 51200,
+      "sha256": "20b14d9f57d34e132bc88f00536a540c3af6de3a5a7bf122eabee022c964aec7"
+    },
+    {
+      "filename": "문제(6)_정답.hwp",
+      "bytes": 54784,
+      "sha256": "4928b7afd9befc45f858a4533d6810ad774be6ff2f0f796cebcef3e9430c8c48"
+    },
+    {
+      "filename": "스크립트(6) (2).hwp",
+      "bytes": 56320,
+      "sha256": "a15ad9db77e13471764380c258d9545a4346ea19db196419004b4858a8ce0042"
+    },
+    {
+      "filename": "중간시험 자료.zip",
+      "bytes": 256336594,
+      "sha256": "e8b90ae152823f28e5414a2216bc656b348f8b075fabdc18a0ab92a1c9e4eb40"
+    },
+    {
+      "filename": "토익 필수 영문법.pptx",
+      "bytes": 12129433,
+      "sha256": "c7f52f294a0ccec209f47b84119b458a8c1d355e940dcf5ff988ea4646de0c89"
+    }
+  ],
+  "archivePolicy": "Every entry in 중간시험 자료.zip belongs to YJY, including 교재 정답/263321_PathwaysRW3e_L4_AnswerKey_AllUnits.pdf.",
+  "sharedSourceReferences": [
+    "../../shared/textbook.json"
+  ],
+  "generatedMaterialsExclusive": true,
+  "audioPolicy": "Every recording, including PW3e textbook audio, is YJY-only.",
+  "rule": "Never reuse YJY handouts, questions, audio, scripts, speaking answers, exam requirements or answer keys for another professor. Only the exact PDF in shared/textbook.json may cross professor boundaries."
+}
