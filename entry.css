@@ -46,6 +46,8 @@ h1 { font-size: 37px; line-height: 1.2; font-weight: 600; letter-spacing: -1.5px
 .enter-button span[aria-hidden] { font-size: 19px; font-weight: 400; line-height: 1; }
 .entry-help { margin-top: 23px; padding-top: 22px; border-top: 1px solid #edf0e9; color: var(--muted); font-size: 11px; text-align: center; line-height: 1.8; }
 .entry-footer { display: flex; justify-content: space-between; gap: 20px; padding-top: 18px; border-top: 1px solid var(--line); color: #798575; font-size: 10px; letter-spacing: .6px; }
+.creator-credit { color: var(--green); font-size: 12px; letter-spacing: 0; white-space: nowrap; }
+.creator-credit strong { font-weight: 650; }
 .no-script { margin: 20px 0 0; padding: 12px; background: #fff1de; border-radius: 8px; color: #795625; font-size: 12px; }
 
 @media (max-width: 540px) {
