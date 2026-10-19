@@ -29,6 +29,7 @@
     const data = window.EXAM_DATA;
     const ownAudioRoot = new URL(`${course.assetRoot}audio/`, location.href).href;
     if (!data || data.professorCode !== code || data.course?.code !== code || !Array.isArray(data.reading?.sets) || !Array.isArray(data.reading?.passages) || !Array.isArray(data.listening?.sets) || !Array.isArray(data.speaking?.models) || !Array.isArray(data.speaking?.topics) || !data.audio) { fail(); return; }
+    if (data.writing && (data.writing.professorCode !== code || data.writing.course?.code !== code)) { fail(); return; }
     try {
       if (Object.values(data.audio).some(clip => typeof clip.file !== 'string' || !new URL(clip.file, location.href).href.startsWith(ownAudioRoot))) { fail(); return; }
       if (data.listening.sets.some(set => set.groups.some(group => !Object.hasOwn(data.audio, group.clipId)))) { fail(); return; }
@@ -38,7 +39,7 @@
     document.getElementById('professor-label').textContent = course.name;
     document.getElementById('course-scope').textContent = course.scope;
     document.getElementById('semester-label').textContent = course.semester;
-    document.getElementById('set-count').textContent = data.reading.sets.length;
+    document.getElementById('set-count').textContent = data.reading.sets.filter(set=>set.category!=='supplement').length;
     const appScript = document.createElement('script');
     appScript.src = window.practiceAsset('app.js');
     appScript.onerror = fail;

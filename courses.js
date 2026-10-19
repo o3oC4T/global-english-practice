@@ -8,5 +8,14 @@ window.PROFESSOR_COURSES = Object.freeze({
     assetRoot: 'professors/yjy/',
     scope: 'UNIT 06 — 07',
     semester: '2026 FALL · MIDTERM'
+  }),
+  gbs: Object.freeze({
+    code: 'gbs',
+    name: 'GBS',
+    dataPath: 'professors/gbs/data.js',
+    memorizationPath: 'professors/gbs/memory.js',
+    assetRoot: 'professors/gbs/',
+    scope: 'UNIT 06 — 07',
+    semester: 'PROVIDED MATERIALS · PRACTICE'
   })
 });

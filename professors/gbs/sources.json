@@ -1,0 +1,96 @@
+{
+  "professorCode": "gbs",
+  "scope": "GBS folder plus the one explicitly shared textbook PDF. No YJY handouts, questions, scripts, translations, audio or exam conditions are reused.",
+  "originalSources": [
+    {
+      "filename": "1스크립 (1).hwp",
+      "bytes": 64000,
+      "sha256": "7c49cf54af4ed854774b37ba1387d644918fe3bcf4af33199677e952b2bd99ff"
+    },
+    {
+      "filename": "2스크립.hwp",
+      "bytes": 76800,
+      "sha256": "7e36902068c965d4bb574f2416aafd7f03ec57d57f788e8e1480e7da53c5be37"
+    },
+    {
+      "filename": "2학기1차단어과제Unit6 Pathways4 (2).hwp",
+      "bytes": 67584,
+      "sha256": "7c6e8e01644233ba6147ffc00f4be2274bcff72d58a76be4d75817a55f7f683b"
+    },
+    {
+      "filename": "2학기2차단어과제Unit7 Pathways4 (1).hwp",
+      "bytes": 69120,
+      "sha256": "a5076a26dfc36ff107268d9ddbfd24140aa112175987495d81c8787056c4e4ff"
+    },
+    {
+      "filename": "KakaoTalk_20261019_215634398.png",
+      "bytes": 109668,
+      "sha256": "48512595a2ef8542b00ffb688ee596cbcea1b50c5f1514e3b2d3a53da19f09f8"
+    },
+    {
+      "filename": "KakaoTalk_20261019_215634398_01.png",
+      "bytes": 83886,
+      "sha256": "a99a6602ab09dcca12e85b5475117526b86fe1660ab8a45ba5b37dd80990963c"
+    },
+    {
+      "filename": "KakaoTalk_20261019_215634398_02.png",
+      "bytes": 183941,
+      "sha256": "2da3a05aa675e87f89c3b397d7e2e77005049acdb5d980c09bdc658b1b8e5a83"
+    },
+    {
+      "filename": "KakaoTalk_20261019_215803056.mp4",
+      "bytes": 61132400,
+      "sha256": "fc8f67dfba260da50382de553480ce1e01cc3798872a5aad9ffad55c42d51148"
+    },
+    {
+      "filename": "KakaoTalk_20261019_215944788.mp4",
+      "bytes": 48053966,
+      "sha256": "65661348e984c184ca2c8fb77fdabf29e9647bf333b41666559497024789a264"
+    },
+    {
+      "filename": "교수용1.WritingSelf-IntroductionEssay.hwp",
+      "bytes": 78848,
+      "sha256": "e81aff202655400f31dbc43b8bb7bbee8ef0a07a6eb795b0debb457afa308c34"
+    },
+    {
+      "filename": "시사영어1.hwp",
+      "bytes": 3425280,
+      "sha256": "f737059b6f8ee168cd84890b390e06f3dc21b4f44b557d1c795b933edbc75bec"
+    },
+    {
+      "filename": "시사영어2.hwp",
+      "bytes": 3379200,
+      "sha256": "2cecba58adc8e3ae0840a730cac95050a8ef9b6f1924298ea31a2fb920e4dd83"
+    },
+    {
+      "filename": "시사영어3.hwp",
+      "bytes": 3691520,
+      "sha256": "ea087ed950488e508dc2b4ac9b5f427516e4ac8552e8416f54d6402cd791c8a9"
+    }
+  ],
+  "sharedSourceReferences": [
+    "../../shared/textbook.json"
+  ],
+  "createdMaterials": {
+    "reading": "300 newly authored textbook and GBS-vocabulary questions",
+    "listening": "100 newly authored TED questions including cloze/comprehension variants, 300 practice slots; each item occurs three times",
+    "supplements": "30 newly authored questions from the three GBS current-affairs handouts",
+    "writing": "Five-section guide and two fictional examples; no source contact details published",
+    "memory": "Two textbook main readings directly extracted from the shared PDF, with independently authored GBS study translations"
+  },
+  "practiceFormat": "Ten practice sets of Reading30+Listening30 and three additional current-affairs sets of10. Actual exam counts, timing and format were not provided.",
+  "textbookParagraphs": {
+    "unit6": "A–Y",
+    "unit7": "A–N"
+  },
+  "listeningScope": "Part1 of both provided scripts; source MP4 audio trimmed to matching ranges. Full videos are not published.",
+  "sourceNotes": [
+    "Original dates and historical statements are retained as source-based reading questions.",
+    "시사영어3: given the all clear is interpreted according to the English text, correcting the conflicting Korean gloss."
+  ],
+  "excludedFromPublication": [
+    "Full MP4 videos",
+    "Original HWP files and embedded personal contact examples",
+    "Original shared textbook PDF"
+  ]
+}
