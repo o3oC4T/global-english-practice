@@ -5,6 +5,7 @@
   const validId = value => typeof value === 'string' && /^[a-z0-9][a-z0-9-]{0,79}$/.test(value);
   const text = value => typeof value === 'string' && value.trim().length > 0;
   const assetURL = window.practiceAsset || (path => path);
+  const unitLabel = unit => typeof unit === 'number' ? `UNIT ${unit}` : String(unit || '추가 독해');
   if (!document.querySelector('link[data-memory-style]')) {
     const link = document.createElement('link');
     link.rel = 'stylesheet'; link.href = assetURL('memorize.css'); link.dataset.memoryStyle = '';
@@ -67,7 +68,7 @@
         <div class="memory-intro"><span class="memory-book" aria-hidden="true">Aa</span><div><h2>한 문장부터, 한 단락까지.</h2><p>원문 순서대로 외우고 단락별 흐름을 연결해요.<br>멈춘 위치와 ‘외웠어요’ 표시는 이 브라우저에 자동 저장돼요.</p></div></div>
         <div class="memory-library">${passages.map(p => {
           const saved = progressFor(p), sentences = flat(p), cursor = sentences.findIndex(s => s.id === saved.sentenceId);
-          return `<article class="memory-passage-card"><div class="memory-card-meta"><span class="level ${p.unit === 7 ? 'medium' : ''}">UNIT ${esc(p.unit)}</span><span>${esc(p.kind)}</span></div><h2 lang="en">${esc(p.title)}</h2><p class="memory-subtitle">${esc(p.subtitle)}</p><p class="memory-count">${p.paragraphs.length}단락 · ${sentences.length}문장</p><div class="memory-meter"><span style="width:${saved.known.length / sentences.length * 100}%"></span></div><p class="memory-saved">${saved.known.length} / ${sentences.length}문장 암기${saved.updated ? ` · ${cursor + 1}번째 문장에서 이어서` : ''}</p><a class="btn outline" href="#memorize/${esc(p.id)}" data-memory-open="${esc(p.id)}">${saved.updated ? '이어서 암기하기' : '본문 암기 시작'} <span>→</span></a><p class="source">${esc(p.source)} · ${esc(p.translationNote || '학습용 번역')}</p></article>`;
+          return `<article class="memory-passage-card"><div class="memory-card-meta"><span class="level ${p.unit === 7 ? 'medium' : ''}">${esc(unitLabel(p.unit))}</span><span>${esc(p.kind)}</span></div><h2 lang="en">${esc(p.title)}</h2><p class="memory-subtitle">${esc(p.subtitle)}</p><p class="memory-count">${p.paragraphs.length}단락 · ${sentences.length}문장</p><div class="memory-meter"><span style="width:${saved.known.length / sentences.length * 100}%"></span></div><p class="memory-saved">${saved.known.length} / ${sentences.length}문장 암기${saved.updated ? ` · ${cursor + 1}번째 문장에서 이어서` : ''}</p><a class="btn outline" href="#memorize/${esc(p.id)}" data-memory-open="${esc(p.id)}">${saved.updated ? '이어서 암기하기' : '본문 암기 시작'} <span>→</span></a><p class="source">${esc(p.source)} · ${esc(p.translationNote || '학습용 번역')}</p></article>`;
         }).join('')}</div><p class="memory-footnote">${esc(professor.name)} 수업 자료의 원문입니다. 한국어 해석과 흐름 단서는 학습을 돕기 위해 작성했어요. 기록 내보내기에 본문 암기 기록도 함께 포함돼요.</p>`;
     }
     function position() {
@@ -87,7 +88,7 @@
       const koHidden = state.visibility === 'hide-ko' && !revealed;
       const revealLabel = state.visibility === 'hide-en' ? '영어' : '해석';
       main.innerHTML = `<a class="back-link" href="#memorize" id="memory-back">← 본문 목록</a>
-        <div class="page-top memory-page-top"><div><p class="eyebrow">UNIT ${esc(current.unit)} · READ & RECALL</p><h1 lang="en">${esc(current.title)}</h1><p class="subtitle">${esc(current.subtitle)}</p></div><span class="subtle-pill">${esc(professor.name)} · ${esc(current.kind)}</span></div>
+        <div class="page-top memory-page-top"><div><p class="eyebrow">${esc(unitLabel(current.unit))} · READ & RECALL</p><h1 lang="en">${esc(current.title)}</h1><p class="subtitle">${esc(current.subtitle)}</p></div><span class="subtle-pill">${esc(professor.name)} · ${esc(current.kind)}</span></div>
         ${(current.notes || []).length ? `<details class="memory-notes" ${current.sourceWarning ? 'open' : ''}><summary>원문 확인 메모</summary><ul>${current.notes.map(note => `<li>${esc(note)}</li>`).join('')}</ul></details>` : ''}
         <div class="memory-toolbar"><div class="memory-unit"><span>학습 단위</span><div class="filter-tabs" role="group" aria-label="학습 단위">${[['sentence','한 문장'],['paragraph','한 단락']].map(([value, label]) => `<button data-memory-mode="${value}" class="${state.mode === value ? 'active' : ''}" aria-pressed="${state.mode === value}">${label}</button>`).join('')}</div></div><label class="memory-hide-label" for="memory-visibility">암기 방법 <select id="memory-visibility"><option value="both" ${state.visibility === 'both' ? 'selected' : ''}>영어 + 해석 함께 보기</option><option value="hide-en" ${state.visibility === 'hide-en' ? 'selected' : ''}>영어 가리기</option><option value="hide-ko" ${state.visibility === 'hide-ko' ? 'selected' : ''}>해석 가리기</option></select></label></div>
         <div class="memory-layout"><section class="memory-workspace" aria-label="본문 암기 카드"><div class="memory-status"><span id="memory-position" aria-live="polite">${modeName} ${info.cursor + 1} / ${info.total}</span><span id="memory-known">${known.size} / ${info.sentences.length}문장 암기</span></div><div class="memory-meter"><span style="width:${known.size / info.sentences.length * 100}%"></span></div>

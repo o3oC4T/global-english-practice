@@ -9,16 +9,17 @@
 ## YJY 구성
 
 - 10회 × Reading 30 + Listening 30문항, 한국어 해설
+- W. Somerset Maugham의 **The Ant and the Grasshopper 추가 독해 30문항**
 - 제공된 TEST 5·6 음원을 분할한 MP3 92개
 - 실제 말하기 질문 10개, 예시 답변 6개, 뜻풀이·60초 타이머
-- 본문 암기: UNIT 6·7 원문 4개, 50단락·167문장과 한국어 학습용 해석
+- 본문 암기: UNIT 6·7 원문 4개와 소설 1개, 총 79단락·283문장과 한국어 학습용 해석
 - 자동 저장, 이어 풀기, 오답 노트, 기록 내보내기·가져오기
 
-600문항 자리 중 570개가 서로 다른 문항입니다. 듣기 Part 2는 서로 다른 원문 60개와 복습 30개이며, Part 3·4는 원본 대화·담화에 대해 새로 작성한 210문항입니다. 반복 음원은 표시됩니다. 실제 시험의 세부 유형 비율과 제한 시간은 제공 안내에 없어 연습용으로 구성했습니다.
+기존 10회 600문항 자리에 작품 추가 독해 30문항을 더해 총 630문항 자리이며, 그중 600개가 서로 다른 문항입니다. 듣기 Part 2는 서로 다른 원문 60개와 복습 30개이며, Part 3·4는 원본 대화·담화에 대해 새로 작성한 210문항입니다. 반복 음원은 표시됩니다. 실제 시험의 세부 유형 비율과 제한 시간은 제공 안내에 없어 연습용으로 구성했습니다.
 
 ## 본문 암기
 
-`yjy`로 들어온 뒤 **본문 암기**를 선택합니다. 모의고사용으로 줄인 지문이 아닌, 제공된 HWP의 원문 순서를 따라 학습합니다.
+`yjy`로 들어온 뒤 **본문 암기**를 선택합니다. 제공된 HWP와 소설 PDF의 원문 순서를 따라 학습합니다. [The Ant and the Grasshopper 바로가기](https://o3oc4t.github.io/global-english-practice/study.html?professor=yjy&v=20261019-yjy-ant-1#memorize/yjy-ant-grasshopper)
 
 | 본문 | 단락 | 문장 |
 | --- | ---: | ---: |
@@ -26,6 +27,7 @@
 | Our Words Are Our Reality | 7 | 22 |
 | The Shape of Africa | 14 | 70 |
 | UNIT 7 추가 인구 지문 | 3 | 9 |
+| The Ant and the Grasshopper | 29 | 116 |
 
 - 한 문장 / 한 단락을 전환하고 영어와 해석을 함께 봅니다.
 - 영어 또는 해석을 가리고 떠올린 뒤 확인합니다. 다음으로 넘기면 다시 가려집니다.
@@ -36,9 +38,11 @@
 
 한국어 해석과 흐름 단서는 새로 작성한 **학습용 번역**입니다. 원문 오탈자 처리와 시점 표현은 각 본문의 **원문 확인 메모**에서 확인할 수 있습니다. UNIT 7 추가 지문의 `8 million`은 원문 그대로 보존하고 오기 가능성을 안내합니다.
 
+**The Ant and the Grasshopper**는 YJY 전용 `The Ant and the  Grasshopper.pdf` 4쪽 전체를 반영했습니다. 모의고사 목록 아래의 **추가 독해**에는 인물·사건·어휘·추론·반어를 연습하는 30문항과 한국어 해설이 있습니다. 기존 10회 문제와 네 본문의 ID·내용을 유지해 이전 답안과 암기 진도를 이어 갑니다.
+
 ## GBS 구성
 
-코드 **gbs**는 `gbs/` 폴더의 수업 자료를 기준으로 만든 별도 과정입니다. [GBS 코드 입력 화면](https://o3oc4t.github.io/global-english-practice/?v=20261019-gbs-1)
+코드 **gbs**는 `gbs/` 폴더의 수업 자료를 기준으로 만든 별도 과정입니다. [GBS 코드 입력 화면](https://o3oc4t.github.io/global-english-practice/?v=20261019-yjy-ant-1)
 
 - 모의고사 10회 × 리딩 30 + 듣기 30문항
 - 교재 UNIT 6·7 및 GBS 어휘 과제·독해 예시를 반영한 **독립 작성 리딩 300문항**
@@ -110,7 +114,7 @@ ZIP을 전체 해제한 뒤 `index.html`을 Chrome 또는 Edge로 열고 `yjy` �
 
 배포 파일이 브라우저에 남아 메뉴가 누락되는 것을 막기 위해 `index.html`과 `study.html`의 `app-release` 및 CSS·스크립트 URL의 `v`를 같은 릴리스 값으로 관리합니다. 새 배포 때 두 HTML의 값을 함께 바꿉니다. 코드 입력 뒤 이동하는 학습 주소, 동적으로 읽는 앱·본문 파일에도 같은 값이 붙습니다. 학습 중인 화면을 강제로 새로고침하지 않습니다. 이는 캐시를 구분하는 용도이며, 시험 시작 당시의 문제를 고정하는 기능은 아닙니다.
 
-이전 탭에 새 메뉴가 보이지 않으면 새 릴리스 주소로 접속합니다. 현재 바로가기: [본문 암기](https://o3oc4t.github.io/global-english-practice/study.html?professor=yjy&v=20261019-gbs-1#memorize). 같은 사이트이므로 교수님별 브라우저 저장 기록은 유지됩니다.
+이전 탭에 새 메뉴가 보이지 않으면 새 릴리스 주소로 접속합니다. 현재 바로가기: [본문 암기](https://o3oc4t.github.io/global-english-practice/study.html?professor=yjy&v=20261019-yjy-ant-1#memorize). 같은 사이트이므로 교수님별 브라우저 저장 기록은 유지됩니다.
 
 ```bash
 git add .

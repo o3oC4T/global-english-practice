@@ -168,14 +168,29 @@
       "UNIT 6-2.hwp",
       "UNIT 6.pptx",
       "UNIT 7.hwp",
-      "UNIT 7_SR.hwp"
+      "UNIT 7_SR.hwp",
+      "The Ant and the  Grasshopper.pdf"
     ],
     "translation": "New study translations paired with original English sentences; exclusive to YJY.",
     "counts": {
-      "passages": 4,
-      "paragraphs": 50,
-      "sentences": 167
+      "passages": 5,
+      "paragraphs": 79,
+      "sentences": 283
     },
     "editorialNotes": "Specific typo handling is documented in each passage; source historical claims are retained."
+  },
+  "storySupplement": {
+    "source": "The Ant and the  Grasshopper.pdf",
+    "author": "W. Somerset Maugham",
+    "pdfPages": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "memoryId": "yjy-ant-grasshopper",
+    "readingSetId": 11,
+    "questionCount": 30,
+    "policy": "Exclusive YJY material. Original ten exam sets and four memory passages retain all IDs and contents."
   }
 }
