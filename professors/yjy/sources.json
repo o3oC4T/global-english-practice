@@ -159,5 +159,23 @@
   ],
   "generatedMaterialsExclusive": true,
   "audioPolicy": "Every recording, including PW3e textbook audio, is YJY-only.",
-  "rule": "Never reuse YJY handouts, questions, audio, scripts, speaking answers, exam requirements or answer keys for another professor. Only the exact PDF in shared/textbook.json may cross professor boundaries."
+  "rule": "Never reuse YJY handouts, questions, audio, scripts, speaking answers, exam requirements or answer keys for another professor. Only the exact PDF in shared/textbook.json may cross professor boundaries.",
+  "memorization": {
+    "file": "memory.js",
+    "professorCode": "yjy",
+    "sources": [
+      "UNIT 6-1 (1).hwp",
+      "UNIT 6-2.hwp",
+      "UNIT 6.pptx",
+      "UNIT 7.hwp",
+      "UNIT 7_SR.hwp"
+    ],
+    "translation": "New study translations paired with original English sentences; exclusive to YJY.",
+    "counts": {
+      "passages": 4,
+      "paragraphs": 50,
+      "sentences": 167
+    },
+    "editorialNotes": "Specific typo handling is documented in each passage; source historical claims are retained."
+  }
 }

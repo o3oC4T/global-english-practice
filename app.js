@@ -22,7 +22,23 @@
   }
   let storageOK = true, toastTimer, active = null, filter='all', speechTimer = null, speechRemaining=SPEECH_SECONDS, speechRunning=false;
   let speechHide=false, speechKorean=true, resultOnlyWrong=false;
-  const emptyDB=()=>({version:1,professorCode:professor.code,runs:{},mastery:{},history:[]});
+  let memoryUI=null, memoryModule=null, memoryRoute=0;
+  const hasMemory=professor.memorizationPath===`${professor.assetRoot}memory.js`;
+  const memoryNav=document.querySelector('#nav [data-view="memorize"]');
+  if(memoryNav) memoryNav.hidden=!hasMemory;
+  const emptyMemory=()=>({mode:'sentence',visibility:'both',passages:{}});
+  function sanitizeMemory(raw){
+    const safe=emptyMemory(), validId=id=>typeof id==='string'&&/^[a-z0-9][a-z0-9-]{0,79}$/.test(id);
+    if(!hasMemory || !raw || typeof raw!=='object') return safe;
+    if(['sentence','paragraph'].includes(raw.mode))safe.mode=raw.mode;
+    if(['both','hide-en','hide-ko'].includes(raw.visibility))safe.visibility=raw.visibility;
+    if(raw.passages && typeof raw.passages==='object')for(const [id,p] of Object.entries(raw.passages).slice(0,100)){
+      if(!validId(id)||!p||!validId(p.sentenceId))continue;
+      safe.passages[id]={sentenceId:p.sentenceId,known:Array.isArray(p.known)?[...new Set(p.known.filter(validId))].slice(0,1000):[],updated:Number.isFinite(p.updated)?p.updated:0};
+    }
+    return safe;
+  }
+  const emptyDB=()=>({version:1,professorCode:professor.code,runs:{},mastery:{},history:[],memory:emptyMemory()});
   function sanitizeDB(raw) {
     if (!raw || raw.version!==1 || typeof raw.runs!=='object' || !raw.runs || typeof raw.mastery!=='object' || !raw.mastery || !Array.isArray(raw.history)) throw new Error('다른 형식의 학습 기록입니다.');
     if (raw.professorCode === undefined ? professor.code !== 'yjy' : raw.professorCode !== professor.code) throw new Error('다른 교수님의 학습 기록은 가져올 수 없습니다.');
@@ -42,6 +58,7 @@
     }
     for(const [id,m] of Object.entries(raw.mastery)) if(index.has(id) && m && Number.isInteger(m.answer) && m.answer>=-1 && m.answer<index.get(id).options.length) safe.mastery[id]={answer:m.answer,correct:m.answer===index.get(id).answer,time:Number(m.time)||0};
     safe.history=raw.history.filter(h=>h && Number.isFinite(h.score) && Number.isFinite(h.total) && h.total>0 && h.score>=0 && h.score<=h.total).slice(-500).map(h=>({setId:Number(h.setId)||0,mode:['all','reading','listening','wrong'].includes(h.mode)?h.mode:'all',score:h.score,total:h.total,date:Number(h.date)||0}));
+    safe.memory=sanitizeMemory(raw.memory);
     return safe;
   }
   let db;
@@ -76,19 +93,41 @@
   function stopSpeech(){clearInterval(speechTimer);speechTimer=null;speechRunning=false;window.speechSynthesis?.cancel();}
   function route(){
     flushActive();active=null;stopSpeech();
+    memoryRoute++;memoryUI?.leave();
     const parts=(location.hash.replace(/^#/,'')||'home').split('/');
     let view=parts[0];
     const navView=['test','result'].includes(view)?'home':view==='speech'?'speaking':view;
     document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('active',a.dataset.view===navView));
-    document.querySelector('#breadcrumb').textContent=`My learning / ${{home:'모의고사',wrong:'오답 노트',speaking:'스피킹 연습',guide:'학습 안내'}[navView]||'모의고사'}`;
+    document.querySelector('#breadcrumb').textContent=`My learning / ${{home:'모의고사',memorize:'본문 암기',wrong:'오답 노트',speaking:'스피킹 연습',guide:'학습 안내'}[navView]||'모의고사'}`;
     if(view==='test') renderTest(parts[1],Number(parts[2])||0);
     else if(view==='result') renderResult(parts[1]);
     else if(view==='wrong')renderWrong();
     else if(view==='speaking')renderSpeaking();
     else if(view==='speech')renderSpeech(Number(parts[1]));
     else if(view==='guide')renderGuide();
+    else if(view==='memorize')renderMemory(parts[1]);
     else renderHome();
     window.scrollTo({top:0,behavior:'instant'});updateBadge();
+  }
+  async function renderMemory(passageId){
+    if(!hasMemory){main.innerHTML=pageTop('READ & RECALL','본문 암기','이 교수님의 본문 암기 자료는 아직 준비되지 않았어요.');return;}
+    const ticket=memoryRoute;
+    main.innerHTML='<div class="loading" role="status">본문과 해석을 불러오는 중입니다…</div>';
+    try{
+      if(!memoryModule)memoryModule=new Promise((resolve,reject)=>{
+        if(window.createMemoryPractice){resolve();return;}
+        const script=document.createElement('script');script.src='memorize.js';
+        script.onload=()=>typeof window.createMemoryPractice==='function'?resolve():reject(new Error('module'));
+        script.onerror=()=>{script.remove();reject(new Error('network'));};document.body.appendChild(script);
+      });
+      await memoryModule;
+      if(ticket!==memoryRoute)return;
+      if(!memoryUI)memoryUI=window.createMemoryPractice({main,professor,toast,getProgress:()=>db.memory,saveProgress:value=>{db.memory=sanitizeMemory(value);save();}});
+      await memoryUI.render(passageId);
+    }catch{
+      memoryModule=null;
+      if(ticket===memoryRoute)main.innerHTML='<div class="storage-warning">본문 암기 화면을 불러오지 못했어요. 새로고침한 뒤 다시 열어 주세요.</div>';
+    }
   }
   function renderHome(){
     const completed=new Set(D.reading.sets.map(s=>s.id).filter(n=>db.runs[`${n}-all`]?.submitted || (db.runs[`${n}-reading`]?.submitted && db.runs[`${n}-listening`]?.submitted)));
@@ -100,6 +139,7 @@
     `<section class="hero"><div><p class="eyebrow">A SMALL STEP, EVERY DAY</p><h2>아는 것에서,<br>자신 있게 답하는 것으로.</h2><p>${esc(C.heroText)}</p></div><div class="hero-art" aria-hidden="true"><div class="art-page"><div class="art-line"></div><div class="art-line"></div><div class="art-line"></div></div><div class="art-circle">✓</div><span class="art-star">✦</span></div></section>`+
     `<div class="stats"><div class="stat"><div class="stat-icon">▦</div><div><p class="stat-label">완료한 회차</p><p class="stat-value">${completed.size}<small>/ ${setIds.size}회</small></p></div></div><div class="stat"><div class="stat-icon">✓</div><div><p class="stat-label">채점한 문항</p><p class="stat-value">${completeQuestions.size}<small>/ ${index.size}</small></p></div></div><div class="stat"><div class="stat-icon">↗</div><div><p class="stat-label">최근 답안 정답률</p><p class="stat-value">${acc===null?'—':acc}<small>${acc===null?'아직 기록 없음':'%'}</small></p></div></div></div>`+
     (resumable?`<div class="continue-banner"><div><p>${esc(titleRun(resumable[1]))} 이어서 풀까요?</p><small>${answered(resumable[1])} / ${resumable[1].itemIds.length}문항 응답 · ${fmt(resumable[1].elapsed)} 학습</small></div><button class="btn" data-resume="${esc(resumable[0])}">이어서 풀기 →</button></div>`:'')+
+    (hasMemory?'<div class="continue-banner"><div><p>영어 한 문장, 해석 한 문장.</p><small>문장과 단락을 오가며 본문의 흐름을 외워 보세요.</small></div><a class="btn outline" href="#memorize">본문 암기 →</a></div>':'')+
     `<div class="section-heading"><h2>모의고사 <span>${esc(professor.name)} 교수님 자료</span></h2><div class="filter-tabs" aria-label="회차 필터">${[['all','전체'],['new','미완료'],['done','완료']].map(([key,label])=>`<button data-filter="${key}" class="${filter===key?'active':''}">${label}</button>`).join('')}</div></div>`+
     `<div class="exam-grid">${D.reading.sets.filter(s=>filter==='all'||(filter==='done'?completed.has(s.id):!completed.has(s.id))).map(s=>{
       const n=s.id,[label,cls,description]=levelFor(n);const run=db.runs[`${n}-all`],rc=itemsFor(n,'reading').length,lc=itemsFor(n,'listening').length;
@@ -230,7 +270,7 @@
     document.querySelector('#speech-reset').onclick=()=>{clearInterval(speechTimer);speechRunning=false;speechRemaining=SPEECH_SECONDS;document.querySelector('#speech-clock').textContent=fmt(SPEECH_SECONDS);document.querySelector('#speech-start').textContent=`${SPEECH_SECONDS}초 연습 시작`;document.querySelector('#speech-status').textContent='준비되면 다시 시작해요.';};
   }
   function renderGuide(){
-    main.innerHTML=pageTop('YOUR GUIDE TO THIS PRACTICE','필요한 것만, 한눈에.',`${esc(professor.name)} 교수님 수업의 시험 범위와 학습 안내.`)+`<div class="guide-grid">${C.guideHtml}<section class="guide-card"><h2>교수님별 학습 기록</h2><ul><li>현재 교수님 코드: <strong>${esc(professor.code)}</strong>. 이 화면에서는 해당 교수님 자료만 사용합니다.</li><li>문제·음원·스피킹·답안·오답 기록을 교수님별로 분리합니다. 자료를 공유할 수 있는 예외는 지정한 교재 PDF 하나입니다.</li><li>선택한 답안과 풀이 시간은 이 브라우저에 저장됩니다. 코드 변경 후 돌아와도 현재 교수님의 기록은 유지됩니다.</li><li>기록을 옮길 때는 내보내기·가져오기를 사용하세요. 다른 교수님의 기록 파일은 가져올 수 없습니다.</li><li>리딩만·듣기만·전체 시험은 별도로 저장됩니다. 오답 노트는 문항별 최근 제출 기록을 사용합니다.</li></ul><div class="action-row"><button class="btn outline small" id="guide-backup">기록 내보내기</button><button class="btn outline small" id="guide-restore">기록 가져오기</button></div></section><section class="guide-card"><h2>다른 기기에서 이어 풀기</h2><p>같은 교수님 코드를 입력해도 기기나 브라우저가 달라지면 기록은 자동으로 연결되지 않습니다. 옮기기 전에 기록을 내보내고 새 화면에서 가져오세요. 브라우저 데이터를 지우거나 시크릿 모드를 사용하면 저장 기록이 사라질 수 있습니다.</p>${professor.code==='yjy'?'<p>YJY 코드가 생기기 전의 기존 백업은 YJY에서 계속 가져올 수 있습니다.</p>':''}</section><section class="guide-card"><h2>HTML로 바로 실행</h2><ol><li>압축파일을 전체 해제합니다.</li><li><code>index.html</code>을 열고 교수님 코드를 입력합니다.</li><li><code>professors</code>와 <code>assets</code> 폴더, HTML·JS·CSS 파일을 함께 유지합니다.</li></ol><p>문제·채점·듣기는 오프라인에서 작동합니다. 스피킹 읽기는 기기의 영어 음성 지원 여부에 따라 달라집니다.</p></section><section class="guide-card"><h2>GitHub Pages에서 사용</h2><p>전체 폴더 구조를 유지해 업로드하면 같은 화면을 사용할 수 있습니다. 학습 기록은 서버에 전송되지 않고 각 브라우저에 저장됩니다. 배포와 업데이트 방법은 README.md를 참고해 주세요.</p></section></div>`;
+    main.innerHTML=pageTop('YOUR GUIDE TO THIS PRACTICE','필요한 것만, 한눈에.',`${esc(professor.name)} 교수님 수업의 시험 범위와 학습 안내.`)+`<div class="guide-grid">${C.guideHtml}<section class="guide-card"><h2>교수님별 학습 기록</h2><ul><li>현재 교수님 코드: <strong>${esc(professor.code)}</strong>. 이 화면에서는 해당 교수님 자료만 사용합니다.</li><li>문제·음원·스피킹·답안·오답 기록을 교수님별로 분리합니다. 자료를 공유할 수 있는 예외는 지정한 교재 PDF 하나입니다.</li><li>선택한 답안과 풀이 시간은 이 브라우저에 저장됩니다. 코드 변경 후 돌아와도 현재 교수님의 기록은 유지됩니다.</li><li>기록을 옮길 때는 내보내기·가져오기를 사용하세요. 다른 교수님의 기록 파일은 가져올 수 없습니다.</li><li>리딩만·듣기만·전체 시험은 별도로 저장됩니다. 오답 노트는 문항별 최근 제출 기록을 사용합니다.</li>${hasMemory?'<li>본문 암기는 문장·단락 단위로 원문과 해석을 봅니다. 멈춘 위치와 외운 문장도 자동 저장되며 기록 내보내기에 함께 포함됩니다.</li>':''}</ul><div class="action-row"><button class="btn outline small" id="guide-backup">기록 내보내기</button><button class="btn outline small" id="guide-restore">기록 가져오기</button></div></section><section class="guide-card"><h2>다른 기기에서 이어 풀기</h2><p>같은 교수님 코드를 입력해도 기기나 브라우저가 달라지면 기록은 자동으로 연결되지 않습니다. 옮기기 전에 기록을 내보내고 새 화면에서 가져오세요. 브라우저 데이터를 지우거나 시크릿 모드를 사용하면 저장 기록이 사라질 수 있습니다.</p>${professor.code==='yjy'?'<p>YJY 코드가 생기기 전의 기존 백업은 YJY에서 계속 가져올 수 있습니다.</p>':''}</section><section class="guide-card"><h2>HTML로 바로 실행</h2><ol><li>압축파일을 전체 해제합니다.</li><li><code>index.html</code>을 열고 교수님 코드를 입력합니다.</li><li><code>professors</code>와 <code>assets</code> 폴더, HTML·JS·CSS 파일을 함께 유지합니다.</li></ol><p>문제·채점·듣기는 오프라인에서 작동합니다. 스피킹 읽기는 기기의 영어 음성 지원 여부에 따라 달라집니다.</p></section><section class="guide-card"><h2>GitHub Pages에서 사용</h2><p>전체 폴더 구조를 유지해 업로드하면 같은 화면을 사용할 수 있습니다. 학습 기록은 서버에 전송되지 않고 각 브라우저에 저장됩니다. 배포와 업데이트 방법은 README.md를 참고해 주세요.</p></section></div>`;
     document.querySelector('#guide-backup').onclick=exportData;document.querySelector('#guide-restore').onclick=()=>document.querySelector('#restore-file').click();
   }
   function exportData(){flushActive();const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`english-progress-${professor.code}-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),3000);toast('학습 기록을 파일로 내보냈어요.');}
