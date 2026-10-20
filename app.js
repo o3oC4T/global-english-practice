@@ -27,6 +27,13 @@
     let n=0;
     for (const group of set.groups) for (const q of group.questions) index.set(q.id,{...q,setId:set.id,section:'listening',number:++n,group});
   }
+  const vocabularyQuestions=[...new Set(C.vocabulary?.questionIds||[])].map(id=>index.get(id)).filter(q=>q?.section==='reading');
+  const hasVocabulary=vocabularyQuestions.length>0;
+  const vocabularyScopes=Object.fromEntries((C.vocabulary?.scopes||[]).map(scope=>[scope.id,scope.label]));
+  const vocabularyFor=scope=>vocabularyQuestions.filter(q=>scope==='all'||scope==='random'||(scope==='story'?typeof q.unit!=='number':q.unit===Number(scope)));
+  let vocabularyNav=document.querySelector('#nav [data-view="vocabulary"]');
+  if(hasVocabulary&&!vocabularyNav){vocabularyNav=document.createElement('a');vocabularyNav.href='#vocabulary';vocabularyNav.dataset.view='vocabulary';vocabularyNav.innerHTML='<span aria-hidden="true">Ab</span> 어휘 집중 연습';document.querySelector('#nav [data-view="home"]').after(vocabularyNav);}
+  if(vocabularyNav)vocabularyNav.hidden=!hasVocabulary;
   let storageOK = true, toastTimer, active = null, filter='all', speechTimer = null, speechRemaining=SPEECH_SECONDS, speechRunning=false;
   let speechHide=false, speechKorean=true, resultOnlyWrong=false;
   let memoryUI=null, memoryModule=null, memoryRoute=0;
@@ -57,19 +64,20 @@
     const safe=emptyDB();
     for(const [key,r] of Object.entries(raw.runs)) {
       if(!r || typeof r!=='object' || !Array.isArray(r.itemIds) || !r.itemIds.length || r.itemIds.length>index.size || !r.itemIds.every(id=>index.has(id)) || new Set(r.itemIds).size!==r.itemIds.length) continue;
-      if(!['all','reading','listening','wrong'].includes(r.mode)) continue;
+      if(!['all','reading','listening','wrong','vocabulary'].includes(r.mode)) continue;
       const answers={}, flags={};
       for(const id of r.itemIds) {
         if(Number.isInteger(r.answers?.[id]) && r.answers[id]>=0 && r.answers[id]<index.get(id).options.length) answers[id]=r.answers[id];
         if(r.flags?.[id]===true) flags[id]=true;
       }
       const setId=Number(r.setId);
-      if(r.mode!=='wrong' && (!Number.isInteger(setId) || !setIds.has(setId) || r.itemIds.some(id=>index.get(id).setId!==setId || (r.mode!=='all' && index.get(id).section!==r.mode)))) continue;
-      const safeKey=r.mode==='wrong'?'wrongbook':`${setId}-${r.mode}`;
-      safe.runs[safeKey]={setId:r.mode==='wrong'?0:setId,mode:r.mode,itemIds:r.itemIds,answers,flags,elapsed:Math.max(0,Math.min(1e7,Number(r.elapsed)||0)),submitted:r.submitted===true,updated:Number(r.updated)||0,completedAt:Number(r.completedAt)||0,cursor:Math.max(0,Math.min(r.itemIds.length-1,Number(r.cursor)||0))};
+      if(r.mode==='vocabulary' && (!hasVocabulary || !Object.hasOwn(vocabularyScopes,r.scope) || r.itemIds.some(id=>!vocabularyFor(r.scope).some(q=>q.id===id)))) continue;
+      if(!['wrong','vocabulary'].includes(r.mode) && (!Number.isInteger(setId) || !setIds.has(setId) || r.itemIds.some(id=>index.get(id).setId!==setId || (r.mode!=='all' && index.get(id).section!==r.mode)))) continue;
+      const safeKey=r.mode==='vocabulary'?`vocabulary-${r.scope}`:r.mode==='wrong'?'wrongbook':`${setId}-${r.mode}`;
+      safe.runs[safeKey]={setId:['wrong','vocabulary'].includes(r.mode)?0:setId,mode:r.mode,...(r.mode==='vocabulary'?{scope:r.scope}:{}),itemIds:r.itemIds,answers,flags,elapsed:Math.max(0,Math.min(1e7,Number(r.elapsed)||0)),submitted:r.submitted===true,updated:Number(r.updated)||0,completedAt:Number(r.completedAt)||0,cursor:Math.max(0,Math.min(r.itemIds.length-1,Number(r.cursor)||0))};
     }
     for(const [id,m] of Object.entries(raw.mastery)) if(index.has(id) && m && Number.isInteger(m.answer) && m.answer>=-1 && m.answer<index.get(id).options.length) safe.mastery[id]={answer:m.answer,correct:m.answer===index.get(id).answer,time:Number(m.time)||0};
-    safe.history=raw.history.filter(h=>h && Number.isFinite(h.score) && Number.isFinite(h.total) && h.total>0 && h.score>=0 && h.score<=h.total).slice(-500).map(h=>({setId:Number(h.setId)||0,mode:['all','reading','listening','wrong'].includes(h.mode)?h.mode:'all',score:h.score,total:h.total,date:Number(h.date)||0}));
+    safe.history=raw.history.filter(h=>h && Number.isFinite(h.score) && Number.isFinite(h.total) && h.total>0 && h.score>=0 && h.score<=h.total).slice(-500).map(h=>({setId:Number(h.setId)||0,mode:['all','reading','listening','wrong','vocabulary'].includes(h.mode)?h.mode:'all',score:h.score,total:h.total,date:Number(h.date)||0}));
     safe.memory=sanitizeMemory(raw.memory);
     if(hasWriting)for(const section of D.writing.sections)if(typeof raw.writing?.[section.id]==='string')safe.writing[section.id]=raw.writing[section.id].slice(0,20000);
     return safe;
@@ -98,8 +106,8 @@
   function runItems(run){return run.itemIds.map(id=>index.get(id)).filter(Boolean);}
   function answered(run){return run.itemIds.filter(id=>Number.isInteger(run.answers[id])).length;}
   function score(run){return run.itemIds.filter(id=>run.answers[id]===index.get(id).answer).length;}
-  function modeLabel(mode){return ({all:'리딩 + 리스닝',reading:'리딩',listening:'리스닝',wrong:'오답 다시 풀기'})[mode];}
-  function titleRun(run){return run.mode==='wrong'?'오답 다시 풀기':`${setLabel(run.setId)} · ${modeLabel(run.mode)}`;}
+  function modeLabel(mode){return ({all:'리딩 + 리스닝',reading:'리딩',listening:'리스닝',wrong:'오답 다시 풀기',vocabulary:'어휘 집중 연습'})[mode];}
+  function titleRun(run){return run.mode==='vocabulary'?`어휘 집중 · ${vocabularyScopes[run.scope]}`:run.mode==='wrong'?'오답 다시 풀기':`${setLabel(run.setId)} · ${modeLabel(run.mode)}`;}
   function pageTop(tag,title,sub,pill=''){return `<div class="page-top"><div><p class="eyebrow">${tag}</p><h1>${title}</h1><p class="subtitle">${sub}</p></div>${pill?`<span class="subtle-pill">${pill}</span>`:''}</div>`;}
   function navigate(hash){if(location.hash===hash)route();else location.hash=hash;}
   function flushActive(){if(active){const run=db.runs[active.key];if(run && !run.submitted){run.cursor=active.cursor;run.updated=Date.now();save();}}}
@@ -109,11 +117,12 @@
     memoryRoute++;memoryUI?.leave();
     const parts=(location.hash.replace(/^#/,'')||'home').split('/');
     let view=parts[0];
-    const navView=['test','result'].includes(view)?'home':view==='speech'?'speaking':view;
+    const navView=['test','result'].includes(view)?(db.runs[parts[1]]?.mode==='vocabulary'?'vocabulary':'home'):view==='speech'?'speaking':view;
     document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('active',a.dataset.view===navView));
-    document.querySelector('#breadcrumb').textContent=`My learning / ${{home:'모의고사',memorize:'본문 암기',wrong:'오답 노트',speaking:'스피킹 연습',writing:'자기소개서 연습',guide:'학습 안내'}[navView]||'모의고사'}`;
+    document.querySelector('#breadcrumb').textContent=`My learning / ${{home:'모의고사',memorize:'본문 암기',vocabulary:'어휘 집중 연습',wrong:'오답 노트',speaking:'스피킹 연습',writing:'자기소개서 연습',guide:'학습 안내'}[navView]||'모의고사'}`;
     if(view==='test') renderTest(parts[1],Number(parts[2])||0);
     else if(view==='result') renderResult(parts[1]);
+    else if(view==='vocabulary')renderVocabulary();
     else if(view==='wrong')renderWrong();
     else if(view==='speaking')renderSpeaking();
     else if(view==='speech')renderSpeech(Number(parts[1]));
@@ -161,6 +170,7 @@
     `<section class="hero"><div><p class="eyebrow">A SMALL STEP, EVERY DAY</p><h2>아는 것에서,<br>자신 있게 답하는 것으로.</h2><p>${esc(C.heroText)}</p></div><div class="hero-art" aria-hidden="true"><div class="art-page"><div class="art-line"></div><div class="art-line"></div><div class="art-line"></div></div><div class="art-circle">✓</div><span class="art-star">✦</span></div></section>`+
     `<div class="stats"><div class="stat"><div class="stat-icon">▦</div><div><p class="stat-label">완료한 ${extra.length?'연습':'회차'}</p><p class="stat-value">${completed.size}<small>/ ${setIds.size}회</small></p></div></div><div class="stat"><div class="stat-icon">✓</div><div><p class="stat-label">채점한 문항</p><p class="stat-value">${completeQuestions.size}<small>/ ${index.size}</small></p></div></div><div class="stat"><div class="stat-icon">↗</div><div><p class="stat-label">최근 답안 정답률</p><p class="stat-value">${acc===null?'—':acc}<small>${acc===null?'아직 기록 없음':'%'}</small></p></div></div></div>`+
     (resumable?`<div class="continue-banner"><div><p>${esc(titleRun(resumable[1]))} 이어서 풀까요?</p><small>${answered(resumable[1])} / ${resumable[1].itemIds.length}문항 응답 · ${fmt(resumable[1].elapsed)} 학습</small></div><button class="btn" data-resume="${esc(resumable[0])}">이어서 풀기 →</button></div>`:'')+
+    (hasVocabulary?`<div class="continue-banner"><div><p>단어와 표현 뜻만 집중해서.</p><small>어휘·표현 ${vocabularyQuestions.length}문항 · 단원별 연습과 랜덤 20문항</small></div><a class="btn outline" href="#vocabulary">어휘 집중 연습 →</a></div>`:'')+
     (hasMemory?'<div class="continue-banner"><div><p>영어 한 문장, 해석 한 문장.</p><small>문장과 단락을 오가며 본문의 흐름을 외워 보세요.</small></div><a class="btn outline" href="#memorize">본문 암기 →</a></div>':'')+
     `<div class="section-heading"><h2>모의고사 <span>${esc(professor.name)} 교수님 자료</span></h2><div class="filter-tabs" aria-label="회차 필터">${[['all','전체'],['new','미완료'],['done','완료']].map(([key,label])=>`<button data-filter="${key}" class="${filter===key?'active':''}">${label}</button>`).join('')}</div></div><div class="exam-grid main-exam-grid">${cards(core)}</div>`+
     (extra.length?`<div class="section-heading"><h2>${esc(C.supplementTitle||'추가 연습')} <span>${esc(C.supplementNote||'제공 자료별 연습')}</span></h2></div><div class="exam-grid supplement-grid">${cards(extra)}</div>`:'')+
@@ -176,6 +186,26 @@
     if(db.runs[key]&&!restart){navigate(`#${db.runs[key].submitted?'result':'test'}/${key}/${db.runs[key].cursor||0}`);return;}
     db.runs[key]={setId,mode,itemIds:itemsFor(setId,mode).map(q=>q.id),answers:{},flags:{},elapsed:0,updated:Date.now(),submitted:false,cursor:0};save();navigate(`#test/${key}/0`);
   }
+  function renderVocabulary(){
+    if(!hasVocabulary){main.innerHTML=pageTop('VOCABULARY','어휘 집중 연습','이 교수님의 어휘 집중 연습은 준비되지 않았어요.');return;}
+    main.innerHTML=pageTop('WORDS IN CONTEXT',esc(C.vocabulary.title),'단어·표현의 뜻을 묻는 기존 문제를 모았어요. 지문과 함께 뜻을 확인해 보세요.',`${vocabularyQuestions.length} QUESTIONS`)+
+      `<div class="exam-grid">${C.vocabulary.scopes.map(({id:scope,label})=>{
+        const count=scope==='random'?Math.min(20,vocabularyQuestions.length):vocabularyFor(scope).length,run=db.runs[`vocabulary-${scope}`];
+        if(!count)return '';
+        return `<article class="exam-card"><div class="card-top"><span class="exam-number">Ab</span><span class="level">${count}문항</span></div><h3>${esc(label)}</h3><p class="card-desc">${scope==='random'?'새로 시작할 때마다 20문항을 중복 없이 뽑아요.':'어휘 뜻 · 유의어 · 표현의 문맥상 의미'}</p>${run?`<p class="card-meta">${run.submitted?`${score(run)} / ${run.itemIds.length} 정답`:`${answered(run)} / ${run.itemIds.length}문항 저장됨`}</p>`:'<p class="card-meta">답안 자동 저장 · 제출 후 정답과 해설</p>'}<button class="btn primary-action" data-vocabulary-start="${scope}">${run?(run.submitted?'결과 · 해설 보기':'이어서 풀기'):'시작하기'} <span>→</span></button>${run?`<button class="btn outline" style="width:100%;margin-top:8px" data-vocabulary-restart="${scope}">${scope==='random'?'새 20문항 뽑기':'처음부터 다시 풀기'}</button>`:''}</article>`;
+      }).join('')}</div><div class="notice">기존 모의고사 답안은 유지하고, 어휘 연습 답안을 따로 저장해요. 제출한 답안은 같은 문제의 오답 노트에 반영돼요.</div>`;
+    main.querySelectorAll('[data-vocabulary-start]').forEach(b=>b.onclick=()=>startVocabulary(b.dataset.vocabularyStart));
+    main.querySelectorAll('[data-vocabulary-restart]').forEach(b=>b.onclick=()=>modal('어휘 연습을 새로 시작할까요?','이 어휘 연습의 답안과 표시가 초기화됩니다. 기존 모의고사 답안은 유지됩니다.','새로 시작',()=>startVocabulary(b.dataset.vocabularyRestart,true)));
+  }
+  function startVocabulary(scope,restart=false){
+    if(!hasVocabulary||!Object.hasOwn(vocabularyScopes,scope))return;
+    const key=`vocabulary-${scope}`;
+    if(db.runs[key]&&!restart){navigate(`#${db.runs[key].submitted?'result':'test'}/${key}/${db.runs[key].cursor||0}`);return;}
+    let ids=vocabularyFor(scope).map(q=>q.id);
+    if(scope==='random'){for(let i=ids.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[ids[i],ids[j]]=[ids[j],ids[i]];}ids=ids.slice(0,20);}
+    if(!ids.length)return;
+    db.runs[key]={setId:0,mode:'vocabulary',scope,itemIds:ids,answers:{},flags:{},elapsed:0,updated:Date.now(),submitted:false,cursor:0};save();navigate(`#test/${key}/0`);
+  }
   function startWrong(ids=wrongIds()){
     if(!ids.length){toast('다시 풀 오답이 없어요.');return;}
     const go=()=>{db.runs.wrongbook={setId:0,mode:'wrong',itemIds:[...new Set(ids)],answers:{},flags:{},elapsed:0,updated:Date.now(),submitted:false,cursor:0};save();navigate('#test/wrongbook/0');};
@@ -187,7 +217,7 @@
     const items=runItems(run);cursor=Math.max(0,Math.min(items.length-1,cursor));active={key,cursor};
     const q=items[cursor];const visible=visibleQuestions(items,cursor);
     main.innerHTML=`<button class="back-link" id="leave-test">← ${run.submitted?'결과로 돌아가기':'저장하고 나가기'}</button><div class="test-header"><div><p class="eyebrow">${run.submitted?'REVIEW YOUR ANSWERS':'ONE QUESTION AT A TIME'}</p><h1>${esc(titleRun(run))}</h1></div><div class="test-status"><span class="timer" id="elapsed">${fmt(run.elapsed)}</span>${run.submitted?'총 풀이 시간':'경과 시간 · 자동 저장'}</div></div><div class="test-progress"><span id="progress-bar" style="width:${answered(run)/items.length*100}%"></span></div><div class="test-layout"><div class="test-content"><div id="question-area">${q.section==='reading'?`<div class="test-reading">${passageHTML(q,run.submitted)}<div>${questionHTML(q,run,items)}</div></div>`:`${audioHTML(q.group,run)}${visible.map(x=>questionHTML(x,run,items)).join('')}`}</div><div class="test-bottom"><button class="btn outline" id="prev-question" ${cursor===0?'disabled':''}>← 이전</button><span id="answered-count">${answered(run)} / ${items.length}문항 응답</span><button class="btn" id="next-question">${Math.max(...visible.map(v=>items.findIndex(x=>x.id===v.id)))===items.length-1?(run.submitted?'결과 보기':'제출하기'):'다음 →'}</button></div></div>${navigatorHTML(run,items,cursor)}</div>`;
-    document.querySelector('#leave-test').onclick=()=>navigate(run.submitted?`#result/${key}`:'#home');
+    document.querySelector('#leave-test').onclick=()=>navigate(run.submitted?`#result/${key}`:run.mode==='vocabulary'?'#vocabulary':'#home');
     main.querySelectorAll('[data-qnav]').forEach(b=>b.onclick=()=>goQuestion(Number(b.dataset.qnav)));
     main.querySelectorAll('[data-answer]').forEach(b=>b.onclick=()=>chooseAnswer(b.dataset.answer,Number(b.dataset.option)));
     main.querySelectorAll('[data-flag]').forEach(b=>b.onclick=()=>toggleFlag(b.dataset.flag));
@@ -246,12 +276,12 @@
   function renderResult(key){
     const run=db.runs[key];if(!run?.submitted){renderHome();return;}
     const items=runItems(run),correct=score(run),pct=Math.round(correct/items.length*100),wrong=items.filter(q=>run.answers[q.id]!==q.answer);
-    main.innerHTML=pageTop('YOUR PRACTICE, REVIEWED',`${esc(run.mode==='wrong'?'오답 연습':setLabel(run.setId))}를 마쳤어요.`,`${esc(modeLabel(run.mode))} · 제출한 답안을 바탕으로 채점했어요.`,`${fmt(run.elapsed)} 학습`)+
+    main.innerHTML=pageTop('YOUR PRACTICE, REVIEWED',`${esc(run.mode==='vocabulary'?`어휘 집중 · ${vocabularyScopes[run.scope]}`:run.mode==='wrong'?'오답 연습':setLabel(run.setId))}를 마쳤어요.`,`${esc(modeLabel(run.mode))} · 제출한 답안을 바탕으로 채점했어요.`,`${fmt(run.elapsed)} 학습`)+
       `<section class="score-hero"><div class="score-ring" style="--score:${pct}"><div class="score-inner"><b>${pct}<span style="font-size:15px">%</span></b><small>정답률</small></div></div><div><h2>${correct}문항 정답 <span style="font-size:14px;color:#879776">/ ${items.length}</span></h2><p>${pct>=90?'잘 이해하고 있어요. 헷갈렸던 표현을 한 번 더 확인해 보세요.':pct>=65?'차근차근 잘 쌓이고 있어요. 오답의 근거를 확인하며 마무리해요.':'틀린 문제부터 다시 살펴봐요. 지문과 음원에 정답의 근거가 있어요.'}</p><div class="score-breakdown">${['reading','listening'].map(s=>{const qs=items.filter(q=>q.section===s);return qs.length?`<span>${s==='reading'?'Reading':'Listening'} ${qs.filter(q=>run.answers[q.id]===q.answer).length} / ${qs.length}</span>`:'';}).join('')}<span>미응답 ${items.length-answered(run)}</span></div></div></section><div class="action-row"><button class="btn" id="review-all">전체 해설 보기 →</button><button class="btn outline" id="review-wrong" ${wrong.length?'':'disabled'}>오답 ${wrong.length}문항 다시 풀기</button><button class="btn outline" id="retry-test">처음부터 다시 풀기</button><button class="btn outline" id="back-home">목록으로</button></div><div class="section-heading"><h2>문항별 결과</h2><div class="filter-tabs"><button class="${!resultOnlyWrong?'active':''}" id="show-all">전체</button><button class="${resultOnlyWrong?'active':''}" id="show-wrong">오답만</button></div></div><div class="review-list">${items.map((q,i)=>({q,i})).filter(({q})=>!resultOnlyWrong||run.answers[q.id]!==q.answer).map(({q,i})=>`<button class="review-row" data-review="${i}"><span class="result-icon ${run.answers[q.id]===q.answer?'':'bad'}">${run.answers[q.id]===q.answer?'✓':'×'}</span><span class="review-title"><small>${i+1}번 · ${esc(q.section==='reading'?`${typeof q.unit==='number'?'UNIT ':''}${q.unit}`:q.group.label||`PART ${q.group.part}`)}</small><br>${esc(q.question)}</span><span>${run.answers[q.id]===undefined?'—':letter(run.answers[q.id])} → ${letter(q.answer)} &nbsp; ↗</span></button>`).join('')||'<div class="empty"><h2>모든 문제를 맞혔어요.</h2></div>'}</div><div class="notice">${esc(C.scoreNotice||'점수는 이 연습의 정답률이며 TOEIC 환산 점수가 아닙니다. 오답과 미응답은 오답 노트에 저장됩니다.')}</div>`;
     document.querySelector('#review-all').onclick=()=>navigate(`#test/${key}/0`);
     document.querySelector('#review-wrong').onclick=()=>startWrong(wrong.map(q=>q.id));
-    document.querySelector('#retry-test').onclick=()=>modal('새 답안으로 다시 풀까요?','이 회차의 답안과 표시가 초기화됩니다. 문항별 최근 학습 기록은 다음 제출 시 갱신됩니다.','다시 시작',()=>run.mode==='wrong'?startWrong(run.itemIds):startSet(run.setId,run.mode,true));
-    document.querySelector('#back-home').onclick=()=>navigate('#home');
+    document.querySelector('#retry-test').onclick=()=>modal('새 답안으로 다시 풀까요?','이 회차의 답안과 표시가 초기화됩니다. 문항별 최근 학습 기록은 다음 제출 시 갱신됩니다.','다시 시작',()=>run.mode==='vocabulary'?startVocabulary(run.scope,true):run.mode==='wrong'?startWrong(run.itemIds):startSet(run.setId,run.mode,true));
+    document.querySelector('#back-home').onclick=()=>navigate(run.mode==='vocabulary'?'#vocabulary':'#home');
     document.querySelector('#show-all').onclick=()=>{resultOnlyWrong=false;renderResult(key);};
     document.querySelector('#show-wrong').onclick=()=>{resultOnlyWrong=true;renderResult(key);};
     main.querySelectorAll('[data-review]').forEach(b=>b.onclick=()=>navigate(`#test/${key}/${b.dataset.review}`));
