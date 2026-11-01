@@ -329,6 +329,7 @@
   function renderPrompter(raw){
     if(!hasSpeaking){renderSpeaking();return;}
     const models=D.speaking.models;
+    const questionNumberWords=['zero','one','two','three','four','five','six','seven','eight','nine','ten'];
     const limit=Number.isInteger(C.speaking.selectionCount)&&C.speaking.selectionCount>0?Math.min(C.speaking.selectionCount,models.length):models.length;
     const selected=raw?[...new Set(raw.split(',').filter(n=>/^\d+$/.test(n)).map(Number))].map(n=>models.find(s=>s.number===n)).filter(Boolean).slice(0,limit):models.slice(0,limit);
     if(!selected.length){renderSpeaking();toast('목록에서 연습할 답변을 골라 주세요.');return;}
@@ -340,7 +341,7 @@
         <label class="prompter-setting" for="prompter-width">너비 <input id="prompter-width" type="range" min="240" max="520" step="20" value="${prompterWidth}"><output id="prompter-width-value" for="prompter-width">${prompterWidth}px</output></label>
         <button class="btn outline small" id="prompter-top">맨 위로 ↑</button>
       </div>
-      <div class="prompter-column" id="prompter-column"><p class="prompter-hint">영어 대본 · 휠이나 터치로 아래로 스크롤</p>${selected.map((s,i)=>`<article class="prompter-topic" data-topic="${s.number}" aria-labelledby="prompter-title-${s.number}"><header><p class="prompter-order">${i+1} / ${selected.length} · TOPIC ${String(s.number).padStart(2,'0')}</p><h1 id="prompter-title-${s.number}">${esc(s.title)}</h1></header><p class="prompter-answer" lang="en">${esc(s.answer)}</p></article>`).join('')}<p class="prompter-finish">대본 끝</p></div>
+      <div class="prompter-column" id="prompter-column"><p class="prompter-hint">영어 대본 · 휠이나 터치로 아래로 스크롤</p>${selected.map((s,i)=>`<article class="prompter-topic" data-topic="${s.number}" aria-labelledby="prompter-title-${s.number}"><header><p class="prompter-order">${i+1} / ${selected.length} · TOPIC ${String(s.number).padStart(2,'0')}</p><h1 id="prompter-title-${s.number}">${esc(s.title)}</h1></header><p class="prompter-intro" lang="en">Question ${esc(questionNumberWords[s.number] ?? s.number)}.</p><p class="prompter-answer" lang="en">${esc(s.answer)}</p></article>`).join('')}<p class="prompter-finish">대본 끝</p></div>
     </section>`;
     const root=main.querySelector('.prompter');
     for(const [id,property] of [['size','--prompter-size'],['width','--prompter-width']]){
