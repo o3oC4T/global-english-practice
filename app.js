@@ -36,6 +36,7 @@
   if(vocabularyNav)vocabularyNav.hidden=!hasVocabulary;
   let storageOK = true, toastTimer, active = null, filter='all', speechTimer = null, speechRemaining=SPEECH_SECONDS, speechRunning=false;
   let speechHide=false, speechKorean=true, resultOnlyWrong=false;
+  let prompterSize=28, prompterWidth=360;
   let memoryUI=null, memoryModule=null, memoryRoute=0;
   const hasMemory=professor.memorizationPath===`${professor.assetRoot}memory.js`;
   let memoryNav=document.querySelector('#nav [data-view="memorize"]');
@@ -114,10 +115,11 @@
   function stopSpeech(){clearInterval(speechTimer);speechTimer=null;speechRunning=false;window.speechSynthesis?.cancel();}
   function route(){
     flushActive();active=null;stopSpeech();
+    document.body.classList.remove('prompter-mode');
     memoryRoute++;memoryUI?.leave();
     const parts=(location.hash.replace(/^#/,'')||'home').split('/');
     let view=parts[0];
-    const navView=['test','result'].includes(view)?(db.runs[parts[1]]?.mode==='vocabulary'?'vocabulary':'home'):view==='speech'?'speaking':view;
+    const navView=['test','result'].includes(view)?(db.runs[parts[1]]?.mode==='vocabulary'?'vocabulary':'home'):["speech","prompter"].includes(view)?'speaking':view;
     document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('active',a.dataset.view===navView));
     document.querySelector('#breadcrumb').textContent=`My learning / ${{home:'모의고사',memorize:'본문 암기',vocabulary:'어휘 집중 연습',wrong:'오답 노트',speaking:'스피킹 연습',writing:'자기소개서 연습',guide:'학습 안내'}[navView]||'모의고사'}`;
     if(view==='test') renderTest(parts[1],Number(parts[2])||0);
@@ -126,6 +128,7 @@
     else if(view==='wrong')renderWrong();
     else if(view==='speaking')renderSpeaking();
     else if(view==='speech')renderSpeech(Number(parts[1]));
+    else if(view==='prompter')renderPrompter(parts[1]);
     else if(view==='guide')renderGuide();
     else if(view==='writing')renderWriting();
     else if(view==='memorize')renderMemory(parts[1]);
@@ -300,13 +303,13 @@
   }
   function renderSpeaking(){
     if(!hasSpeaking){main.innerHTML=pageTop('SPEAKING','스피킹 안내','이 교수님의 제공 자료에는 스피킹 시험 질문이 없어 별도 연습을 등록하지 않았어요.');return;}
-    main.innerHTML=pageTop('SPEAK WITH A LITTLE MORE CONFIDENCE',esc(C.speaking.title),esc(C.speaking.subtitle),esc(C.speaking.badge))+`<div class="speaking-info"><strong>실제 시험 안내</strong> &nbsp; ${esc(C.speaking.instructions)}</div><div class="section-heading"><h2>준비한 답변 ${D.speaking.models.length}개 <span>실제 문항 번호 기준</span></h2></div><div class="speaking-grid">${D.speaking.models.map(s=>`<article class="speaking-card"><span class="level ${s.unit===7?'medium':''}">UNIT ${s.unit} · TOPIC ${String(s.number).padStart(2,'0')}</span><h3>${esc(s.title)}</h3><p>${esc(s.summary)}</p><div class="speech-keywords">${s.keywords.slice(0,3).map(k=>`<span>${esc(k)}</span>`).join('')}</div><button class="btn outline" data-speech="${s.number}">답변 연습하기 <span>→</span></button></article>`).join('')}</div><div class="section-heading"><h2>공식 질문 전체 ${D.speaking.topics.length}개</h2></div><div class="official-list">${D.speaking.topics.map(t=>`<details><summary>${t.number}. ${esc(t.title)}</summary><p lang="en">${esc(t.question)}</p></details>`).join('')}</div><div class="notice">${esc(C.speaking.rubric)}</div>`;
+    main.innerHTML=pageTop('SPEAK WITH A LITTLE MORE CONFIDENCE',esc(C.speaking.title),esc(C.speaking.subtitle),esc(C.speaking.badge))+`<div class="speaking-info"><strong>실제 시험 안내</strong> &nbsp; ${esc(C.speaking.instructions)}</div><div class="continue-banner"><div><p>촬영할 때는 화면 가운데 모아서.</p><small>문항을 골라 좁은 대본으로 보고, 직접 아래로 스크롤하세요.</small></div><a class="btn" id="prompter-start" href="#prompter">촬영용 대본 →</a></div><div class="section-heading"><h2>준비한 답변 ${D.speaking.models.length}개 <span>실제 문항 번호 기준</span></h2></div><div class="speaking-grid">${D.speaking.models.map(s=>`<article class="speaking-card"><span class="level ${s.unit===7?'medium':''}">UNIT ${s.unit} · TOPIC ${String(s.number).padStart(2,'0')}</span><h3>${esc(s.title)}</h3><p>${esc(s.summary)}</p><div class="speech-keywords">${s.keywords.slice(0,3).map(k=>`<span>${esc(k)}</span>`).join('')}</div><button class="btn outline" data-speech="${s.number}">답변 연습하기 <span>→</span></button></article>`).join('')}</div><div class="section-heading"><h2>공식 질문 전체 ${D.speaking.topics.length}개</h2></div><div class="official-list">${D.speaking.topics.map(t=>`<details><summary>${t.number}. ${esc(t.title)}</summary><p lang="en">${esc(t.question)}</p></details>`).join('')}</div><div class="notice">${esc(C.speaking.rubric)}</div>`;
     main.querySelectorAll('[data-speech]').forEach(b=>b.onclick=()=>navigate(`#speech/${b.dataset.speech}`));
   }
   function renderSpeech(n){
     const s=D.speaking.models.find(x=>x.number===n),topic=D.speaking.topics.find(x=>x.number===n);if(!s){renderSpeaking();return;}
     speechRemaining=SPEECH_SECONDS;speechHide=false;speechKorean=true;
-    main.innerHTML=`<button class="back-link" id="back-speaking">← 스피킹 목록</button>${pageTop(`SPEAKING TOPIC ${String(n).padStart(2,'0')}`,esc(s.title),`UNIT ${s.unit} · 약 ${s.answer.split(/\s+/).length}단어 · 말하는 속도에 따라 ${esc(C.speaking.durationLabel)}`)}<section class="speaking-prompt"><p class="panel-label">THE QUESTION</p><p lang="en">${esc(topic.question)}</p></section><div class="speaking-layout"><div><section class="speech-panel"><h2>답변 흐름 먼저 잡기</h2><ol class="outline-list">${s.outline.map(x=>`<li>${esc(x)}</li>`).join('')}</ol><div class="speech-keywords">${s.keywords.map(k=>`<span>${esc(k)}</span>`).join('')}</div></section><section class="speech-panel"><div class="section-heading" style="margin:0 0 16px"><h2 style="margin:0">연습 답변</h2><button class="btn outline small" id="toggle-script">답변 가리기</button></div><p class="speech-script" id="speech-answer" lang="en">${esc(s.answer)}</p><div class="action-row"><button class="btn outline small" id="read-speech">영어로 듣기 ▷</button><button class="btn outline small" id="stop-read">읽기 중지</button><button class="btn outline small" id="toggle-korean">뜻풀이 가리기</button></div><p class="speech-korean" id="speech-korean">${esc(s.translation)}</p></section><section class="speech-panel"><h2>말할 때 기억할 표현</h2><ul class="outline-list">${s.tips.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><p class="source">영어 읽기는 기기의 음성 기능을 사용합니다. 영어 음성이 없으면 작동하지 않을 수 있어요. ${esc(C.speaking.submissionNote)}</p></section></div><aside class="speech-timer-panel"><p class="eyebrow">${esc(C.speaking.timerTitle)}</p><div class="timer-big" id="speech-clock">${fmt(SPEECH_SECONDS)}</div><p id="speech-status">질문을 읽고,<br>준비되면 말하기를 시작해요.</p><button class="btn" id="speech-start">${SPEECH_SECONDS}초 연습 시작</button><button class="btn outline" id="speech-reset">타이머 초기화</button><div class="rubric"><b>스스로 점검해요</b>질문에 직접 답했나요?<br>근거와 예시가 있나요?<br>핵심 단어를 또렷하게 말했나요?<br>문장 사이에 잠깐 쉬었나요?</div></aside></div>`;
+    main.innerHTML=`<div class="speech-view-actions"><button class="back-link" id="back-speaking">← 스피킹 목록</button><a class="btn outline" id="open-prompter" href="#prompter/${n}">촬영용 대본 →</a></div>${pageTop(`SPEAKING TOPIC ${String(n).padStart(2,'0')}`,esc(s.title),`UNIT ${s.unit} · 약 ${s.answer.split(/\s+/).length}단어 · 말하는 속도에 따라 ${esc(C.speaking.durationLabel)}`)}<section class="speaking-prompt"><p class="panel-label">THE QUESTION</p><p lang="en">${esc(topic.question)}</p></section><div class="speaking-layout"><div><section class="speech-panel"><h2>답변 흐름 먼저 잡기</h2><ol class="outline-list">${s.outline.map(x=>`<li>${esc(x)}</li>`).join('')}</ol><div class="speech-keywords">${s.keywords.map(k=>`<span>${esc(k)}</span>`).join('')}</div></section><section class="speech-panel"><div class="section-heading" style="margin:0 0 16px"><h2 style="margin:0">연습 답변</h2><button class="btn outline small" id="toggle-script">답변 가리기</button></div><p class="speech-script" id="speech-answer" lang="en">${esc(s.answer)}</p><div class="action-row"><button class="btn outline small" id="read-speech">영어로 듣기 ▷</button><button class="btn outline small" id="stop-read">읽기 중지</button><button class="btn outline small" id="toggle-korean">뜻풀이 가리기</button></div><p class="speech-korean" id="speech-korean">${esc(s.translation)}</p></section><section class="speech-panel"><h2>말할 때 기억할 표현</h2><ul class="outline-list">${s.tips.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><p class="source">영어 읽기는 기기의 음성 기능을 사용합니다. 영어 음성이 없으면 작동하지 않을 수 있어요. ${esc(C.speaking.submissionNote)}</p></section></div><aside class="speech-timer-panel"><p class="eyebrow">${esc(C.speaking.timerTitle)}</p><div class="timer-big" id="speech-clock">${fmt(SPEECH_SECONDS)}</div><p id="speech-status">질문을 읽고,<br>준비되면 말하기를 시작해요.</p><button class="btn" id="speech-start">${SPEECH_SECONDS}초 연습 시작</button><button class="btn outline" id="speech-reset">타이머 초기화</button><div class="rubric"><b>스스로 점검해요</b>질문에 직접 답했나요?<br>근거와 예시가 있나요?<br>핵심 단어를 또렷하게 말했나요?<br>문장 사이에 잠깐 쉬었나요?</div></aside></div>`;
     document.querySelector('#back-speaking').onclick=()=>navigate('#speaking');
     document.querySelector('#toggle-script').onclick=e=>{speechHide=!speechHide;document.querySelector('#speech-answer').hidden=speechHide;e.target.textContent=speechHide?'답변 다시 보기':'답변 가리기';};
     document.querySelector('#toggle-korean').onclick=e=>{speechKorean=!speechKorean;document.querySelector('#speech-korean').hidden=!speechKorean;e.target.textContent=speechKorean?'뜻풀이 가리기':'뜻풀이 보기';};
@@ -322,6 +325,43 @@
       speechTimer=setInterval(()=>{speechRemaining=Math.max(0,Math.ceil((end-Date.now())/1000));document.querySelector('#speech-clock').textContent=fmt(speechRemaining);if(speechRemaining===0){clearInterval(speechTimer);speechRunning=false;document.querySelector('#speech-start').textContent='다시 연습하기';document.querySelector('#speech-status').textContent=`${SPEECH_SECONDS}초가 지났어요. 답변을 마무리해 주세요.`;toast(`${SPEECH_SECONDS}초 연습을 마쳤어요.`);}},200);
     };
     document.querySelector('#speech-reset').onclick=()=>{clearInterval(speechTimer);speechRunning=false;speechRemaining=SPEECH_SECONDS;document.querySelector('#speech-clock').textContent=fmt(SPEECH_SECONDS);document.querySelector('#speech-start').textContent=`${SPEECH_SECONDS}초 연습 시작`;document.querySelector('#speech-status').textContent='준비되면 다시 시작해요.';};
+  }
+  function renderPrompter(raw){
+    if(!hasSpeaking){renderSpeaking();return;}
+    const models=D.speaking.models;
+    const limit=Number.isInteger(C.speaking.selectionCount)&&C.speaking.selectionCount>0?Math.min(C.speaking.selectionCount,models.length):models.length;
+    const selected=raw?[...new Set(raw.split(',').filter(n=>/^\d+$/.test(n)).map(Number))].map(n=>models.find(s=>s.number===n)).filter(Boolean).slice(0,limit):models.slice(0,limit);
+    if(!selected.length){renderSpeaking();toast('목록에서 연습할 답변을 골라 주세요.');return;}
+    document.body.classList.add('prompter-mode');
+    main.innerHTML=`<section class="prompter" aria-label="촬영용 스피킹 대본" style="--prompter-size:${prompterSize}px;--prompter-width:${prompterWidth}px">
+      <div class="prompter-toolbar"><a class="btn outline small" id="prompter-exit" href="#speaking">← 연습 화면</a>
+        <details class="prompter-topics" id="prompter-topics"><summary>문항 선택 · ${selected.length}개</summary><div class="prompter-picker"><p>준비된 답변 중 1–${limit}개를 골라 주세요.</p><fieldset><legend class="sr-only">촬영할 문항</legend>${models.map(s=>`<label><input type="checkbox" data-prompter-topic="${s.number}" ${selected.some(item=>item.number===s.number)?'checked':''}><span><b>${s.number}번</b> ${esc(s.title)}</span></label>`).join('')}</fieldset><p id="prompter-selection-status" role="status"></p><button class="btn small" id="prompter-apply">선택한 대본 보기</button></div></details>
+        <label class="prompter-setting" for="prompter-size">글자 <input id="prompter-size" type="range" min="20" max="40" step="2" value="${prompterSize}"><output id="prompter-size-value" for="prompter-size">${prompterSize}px</output></label>
+        <label class="prompter-setting" for="prompter-width">너비 <input id="prompter-width" type="range" min="240" max="520" step="20" value="${prompterWidth}"><output id="prompter-width-value" for="prompter-width">${prompterWidth}px</output></label>
+        <button class="btn outline small" id="prompter-top">맨 위로 ↑</button>
+      </div>
+      <div class="prompter-column" id="prompter-column"><p class="prompter-hint">영어 대본 · 휠이나 터치로 아래로 스크롤</p>${selected.map((s,i)=>`<article class="prompter-topic" data-topic="${s.number}" aria-labelledby="prompter-title-${s.number}"><header><p class="prompter-order">${i+1} / ${selected.length} · TOPIC ${String(s.number).padStart(2,'0')}</p><h1 id="prompter-title-${s.number}">${esc(s.title)}</h1></header><p class="prompter-answer" lang="en">${esc(s.answer)}</p></article>`).join('')}<p class="prompter-finish">대본 끝</p></div>
+    </section>`;
+    const root=main.querySelector('.prompter');
+    for(const [id,property] of [['size','--prompter-size'],['width','--prompter-width']]){
+      main.querySelector(`#prompter-${id}`).oninput=event=>{
+        const value=Number(event.target.value);
+        if(id==='size')prompterSize=value;else prompterWidth=value;
+        root.style.setProperty(property,`${value}px`);
+        main.querySelector(`#prompter-${id}-value`).textContent=`${value}px`;
+      };
+    }
+    main.querySelectorAll('[data-prompter-topic]').forEach(input=>input.onchange=()=>{
+      const count=main.querySelectorAll('[data-prompter-topic]:checked').length;
+      if(count>limit){input.checked=false;main.querySelector('#prompter-selection-status').textContent=`최대 ${limit}개까지 선택할 수 있어요.`;}
+      else main.querySelector('#prompter-selection-status').textContent=`${count}개 선택`;
+    });
+    main.querySelector('#prompter-apply').onclick=()=>{
+      const numbers=[...main.querySelectorAll('[data-prompter-topic]:checked')].map(input=>input.dataset.prompterTopic);
+      if(!numbers.length){main.querySelector('#prompter-selection-status').textContent='문항을 하나 이상 골라 주세요.';return;}
+      navigate(`#prompter/${numbers.join(',')}`);
+    };
+    main.querySelector('#prompter-top').onclick=()=>window.scrollTo({top:0,behavior:'instant'});
   }
   function renderWriting(){
     if(!hasWriting){main.innerHTML=pageTop('WRITING','자기소개서 연습','이 교수님의 작문 연습 자료는 아직 준비되지 않았어요.');return;}
